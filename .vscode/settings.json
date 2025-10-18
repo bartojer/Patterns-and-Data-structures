@@ -1,0 +1,11 @@
+{
+    "elixirLS.projectDir": "./main",
+    "elixirLS.mixEnv": "test",
+    "elixirLS.fetchDeps": false,
+    "elixirLS.suggestSpecs": true,
+    "elixirLS.dialyzerEnabled": false,
+    "elixirLS.dialyzerWarnOpts": [],
+    "elixirLS.signatureAfterComplete": true,
+    "elixirLS.enableTestLenses": true,
+    "elixirLS.mixTarget": "host"
+}

@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "mix_task",
+            "name": "Debug Queue Tests",
+            "request": "launch",
+            "task": "test",
+            "taskArgs": [
+                "test/data_structures/queue_test.exs"
+            ],
+            "projectDir": "${workspaceFolder}/main",
+            "requireFiles": [
+                "test/test_helper.exs"
+            ]
+        },
+        {
+            "type": "mix_task", 
+            "name": "Debug All Tests",
+            "request": "launch",
+            "task": "test",
+            "projectDir": "${workspaceFolder}/main",
+            "requireFiles": [
+                "test/test_helper.exs"
+            ]
+        }
+    ]
+}

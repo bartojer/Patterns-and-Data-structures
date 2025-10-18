@@ -1,0 +1,93 @@
+{
+    "version": "2.0.0",
+    "options": {
+        "cwd": "${workspaceRoot}/main"
+    },
+    "tasks": [
+        {
+            "label": "mix test",
+            "type": "shell",
+            "command": "mix",
+            "args": ["test"],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$mixCompileError",
+                "$mixCompileWarning",
+                "$mixTestFailure"
+            ]
+        },
+        {
+            "label": "mix test (current file)",
+            "type": "shell",
+            "command": "mix",
+            "args": ["test", "${relativeFile}"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$mixCompileError",
+                "$mixCompileWarning",
+                "$mixTestFailure"
+            ]
+        },
+        {
+            "label": "mix test (queue tests)",
+            "type": "shell",
+            "command": "mix",
+            "args": ["test", "test/data_structures/queue_test.exs"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$mixCompileError",
+                "$mixCompileWarning",
+                "$mixTestFailure"
+            ]
+        },
+        {
+            "label": "mix compile",
+            "type": "shell",
+            "command": "mix",
+            "args": ["compile"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$mixCompileError",
+                "$mixCompileWarning"
+            ]
+        }
+    ]
+}
