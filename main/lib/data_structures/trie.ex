@@ -1,56 +1,118 @@
 defmodule DataStructure.Trie do
-  # @type element :: term()
-  @type node_map(element) :: %{element => trie(element)}
-  @type node_map :: node_map(any)
-  @type trie(element) :: {value :: element, children :: node_map(element)}
-  @type trie :: trie(any)
-  # @type trie(element) :: {start_node :: element, trie :: node(element)}
-  # @type trie :: trie(any)
-  # @type forest :: [node()]
+  @moduledoc """
+  A clean Trie implementation supporting add, contains?, remove, and prefix lookup.
+  """
 
-  @spec empty?(trie) :: boolean()
-  def empty?({_start_node, _other}) do
-    true
+  defstruct end_of_word?: false, children: %{}
+
+  @type trie :: %__MODULE__{
+          end_of_word?: boolean,
+          children: %{optional(char) => trie}
+        }
+
+  # -- Public API --
+
+  @spec new() :: trie
+  def new(), do: %__MODULE__{}
+
+  @spec add(trie, binary) :: trie
+  def add(trie, word) when is_binary(word) do
+    add_chars(trie, String.to_charlist(word))
   end
 
-  @spec add(any(), trie) :: trie
-  def add(word, trie) when is_binary(word) do
-    add(String.to_charlist(word), trie)
+  @spec empty?(trie) :: boolean
+  def empty?(%__MODULE__{end_of_word?: end_of_word, children: kids}) do
+    not end_of_word and kids == %{}
   end
 
-  def add([], {value, map}), do: {value, Map.put(map, :word_end, nil)}
+  @spec contains?(trie, binary) :: boolean
+  def contains?(trie, word) when is_binary(word) do
+    contains_chars?(trie, String.to_charlist(word))
+  end
 
-  def add([next_char | remaining_chars], {value, map}) do
-    if Map.has_key?(map, next_char) do
-      sub_trie = Map.fetch!(map, next_char)
-      updated_branch = add(remaining_chars, sub_trie)
-      {value, Map.put(map, next_char, updated_branch)}
-    else
-      {value, Map.put(map, next_char, build_branch(remaining_chars))}
+  @spec remove(trie, binary) :: trie
+  def remove(trie, word) when is_binary(word) do
+    {trie, _deleted?} = remove_chars(trie, String.to_charlist(word))
+    trie
+  end
+
+  @spec prefix(trie, binary) :: [binary]
+  def prefix(trie, word) when is_binary(word) do
+    chars = String.to_charlist(word)
+
+    case walk(trie, chars) do
+      {:ok, node} -> collect_words(node, word)
+      :error -> []
     end
   end
 
-  @spec build_branch(list(term)) :: trie(term) | node_map(term)
-  def build_branch([]), do: %{:word_end => nil}
-
-  def build_branch([next_char | remaining_chars]) do
-    {next_char, %{next_char => build_branch(remaining_chars)}}
+  @spec to_list(trie) :: [binary]
+  def to_list(%__MODULE__{} = trie) do
+    prefix(trie, "")
   end
 
-  @spec contains?(term, trie) :: boolean
-  def contains?([], {_value, map}) do
-    if Map.has_key?(map, :word_end) do
-      true
-    else
-      false
+  @spec from_list([binary]) :: trie
+  def from_list([]), do: new()
+
+  def from_list(word_list) when is_list(word_list) do
+    Enum.reduce(word_list, new(), fn word, trie -> add(trie, word) end)
+  end
+
+  # -- Internal Implementation --
+
+  defp add_chars(%__MODULE__{} = node, []), do: %{node | end_of_word?: true}
+
+  defp add_chars(%__MODULE__{children: kids} = node, [char | rest]) do
+    child = Map.get(kids, char, new())
+    updated_child = add_chars(child, rest)
+    %{node | children: Map.put(kids, char, updated_child)}
+  end
+
+  defp contains_chars?(%__MODULE__{end_of_word?: true}, []), do: true
+  defp contains_chars?(%__MODULE__{}, []), do: false
+
+  defp contains_chars?(%__MODULE__{children: kids}, [char | rest]) do
+    case Map.get(kids, char) do
+      nil -> false
+      child -> contains_chars?(child, rest)
     end
   end
 
-  def contains?([next_char | remaining_chars], {_value, map}) do
-    if Map.has_key?(map, next_char) do
-      contains?(remaining_chars, Map.fetch!(map, next_char))
+  # remove returns `{updated_node, should_delete_this_node?}`
+  defp remove_chars(%__MODULE__{} = node, []),
+    do: {%{node | end_of_word?: false}, node.children == %{}}
+
+  defp remove_chars(%__MODULE__{children: kids} = node, [char | rest]) do
+    with child when not is_nil(child) <- Map.get(kids, char),
+         {new_child, delete?} <- remove_chars(child, rest) do
+      new_children =
+        case delete? do
+          true -> Map.delete(kids, char)
+          false -> Map.put(kids, char, new_child)
+        end
+
+      new_node = %{node | children: new_children}
+      delete_node? = not new_node.end_of_word? and new_node.children == %{}
+      {new_node, delete_node?}
     else
-      false
+      _ -> {node, false}
     end
+  end
+
+  defp walk(node, []), do: {:ok, node}
+
+  defp walk(%__MODULE__{children: kids}, [char | rest]) do
+    case Map.get(kids, char) do
+      nil -> :error
+      child -> walk(child, rest)
+    end
+  end
+
+  defp collect_words(%__MODULE__{end_of_word?: end_of_word, children: kids}, prefix) do
+    base = if end_of_word, do: [prefix], else: []
+
+    Enum.flat_map(kids, fn {char, child} ->
+      collect_words(child, prefix <> <<char>>)
+    end) ++ base
   end
 end
