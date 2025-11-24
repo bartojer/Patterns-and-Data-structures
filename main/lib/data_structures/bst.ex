@@ -25,6 +25,34 @@ defmodule DataStructure.Bst do
     {1, value, nil, {0, element, nil, nil}}
   end
 
+  def add({_height, value, nil, next_right = {right_height, _, _, _}}, element)
+      when element <= value do
+    child_node = {child_height, _, _, _} = add(nil, element)
+
+    {max(child_height, right_height) + 1, value, child_node, next_right}
+  end
+
+  def add({_height, value, nil, next_right = {right_height, _, _, _}}, element)
+      when element > value do
+    child_node = {child_height, _, _, _} = add(next_right, element)
+
+    {max(child_height, right_height) + 1, value, nil, child_node}
+  end
+
+  def add({_height, value, next_left = {left_height, _, _, _}, nil}, element)
+      when element <= value do
+    child_node = {child_height, _, _, _} = add(next_left, element)
+
+    {max(child_height, left_height) + 1, value, child_node, nil}
+  end
+
+  def add({_height, value, next_left = {left_height, _, _, _}, nil}, element)
+      when element > value do
+    child_node = {child_height, _, _, _} = add(nil, element)
+
+    {max(child_height, left_height) + 1, value, next_left, child_node}
+  end
+
   def add({_height, value, next_left, next_right = {right_height, _, _, _}}, element)
       when element <= value do
     child_node = {child_height, _, _, _} = add(next_left, element)
