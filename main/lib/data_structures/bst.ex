@@ -15,7 +15,7 @@ defmodule DataStructure.Bst do
   def empty(_), do: false
 
   @spec add(tree(), any()) :: tree()
-  def add(nil, number), do: {0, number, nil, nil}
+  def add(nil, element), do: {0, element, nil, nil}
 
   def add({_, value, nil, nil}, element) when element <= value do
     {1, value, {0, element, nil, nil}, nil}
@@ -142,7 +142,7 @@ defmodule DataStructure.Bst do
     Enum.reduce(numbers, new(), fn number, tree -> add(tree, number) end)
   end
 
-  @spec height(tree()) :: integer | nil
+  @spec height(tree()) :: integer() | nil
   def height({}), do: nil
   def height({height, _value, _next_left, _next_right}), do: height
   # def height(tree), do: find_height(tree, -1)
